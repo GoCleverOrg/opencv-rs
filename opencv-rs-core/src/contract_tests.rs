@@ -154,7 +154,7 @@ pub fn verify_image_ops_cvt_color_bgr_to_gray<O: ImageOpsPort>(ops: &O) {
     assert_eq!(out.height(), 1);
     // Weight for red in BGR is 0.299: 0.299*255 ~= 76.2 -> 76. Allow 1 of rounding slack.
     let v = out.data()[0];
-    assert!(v >= 75 && v <= 77, "unexpected gray value {v}");
+    assert!((75..=77).contains(&v), "unexpected gray value {v}");
 }
 
 /// Verify that `gaussian_blur` returns an output with the same dimensions as the input.

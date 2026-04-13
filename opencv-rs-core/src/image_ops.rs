@@ -113,7 +113,7 @@ impl ImageOpsPort for PureRustImageOps {
                 let (expected_src, out_pf) = match conv {
                     ColorConversion::BgrToRgb => (PixelFormat::Bgr8, PixelFormat::Rgb8),
                     ColorConversion::RgbToBgr => (PixelFormat::Rgb8, PixelFormat::Bgr8),
-                    _ => unreachable!(),
+                    ColorConversion::BgrToGray | ColorConversion::GrayToRgb => unreachable!(),
                 };
                 if pf != expected_src {
                     return Err(ImageOpsError::UnsupportedConversion {
@@ -122,11 +122,11 @@ impl ImageOpsPort for PureRustImageOps {
                     });
                 }
                 let mut out = vec![0u8; data.len()];
-                for px in 0..(w as usize * h as usize) {
-                    let i = px * 3;
-                    out[i] = data[i + 2];
-                    out[i + 1] = data[i + 1];
-                    out[i + 2] = data[i];
+                for (i, chunk) in out.chunks_exact_mut(3).enumerate() {
+                    let src = i * 3;
+                    chunk[0] = data[src + 2];
+                    chunk[1] = data[src + 1];
+                    chunk[2] = data[src];
                 }
                 OwnedMatView::new(w, h, out_pf, out)
             }
@@ -137,16 +137,15 @@ impl ImageOpsPort for PureRustImageOps {
                         dst: PixelFormat::Mono8,
                     });
                 }
-                let n = w as usize * h as usize;
-                let mut out = vec![0u8; n];
-                for px in 0..n {
-                    let i = px * 3;
-                    let b = data[i] as f64;
-                    let g = data[i + 1] as f64;
-                    let r = data[i + 2] as f64;
-                    let y = 0.114 * b + 0.587 * g + 0.299 * r;
-                    out[px] = sat_u8(y);
-                }
+                let out: Vec<u8> = data
+                    .chunks_exact(3)
+                    .map(|px| {
+                        let b = px[0] as f64;
+                        let g = px[1] as f64;
+                        let r = px[2] as f64;
+                        sat_u8(0.114 * b + 0.587 * g + 0.299 * r)
+                    })
+                    .collect();
                 OwnedMatView::new(w, h, PixelFormat::Mono8, out)
             }
             ColorConversion::GrayToRgb => {
@@ -156,14 +155,7 @@ impl ImageOpsPort for PureRustImageOps {
                         dst: PixelFormat::Rgb8,
                     });
                 }
-                let n = w as usize * h as usize;
-                let mut out = vec![0u8; n * 3];
-                for px in 0..n {
-                    let v = data[px];
-                    out[px * 3] = v;
-                    out[px * 3 + 1] = v;
-                    out[px * 3 + 2] = v;
-                }
+                let out: Vec<u8> = data.iter().flat_map(|&v| [v, v, v]).collect();
                 OwnedMatView::new(w, h, PixelFormat::Rgb8, out)
             }
         }

@@ -33,23 +33,14 @@ impl ImageEncoderPort for OpenCvImageEncoder {
             return Ok(frame.data().to_vec());
         }
         let mat = mat_from_view(frame).map_err(|e| ImageEncodingError::Backend(e.to_string()))?;
-        let ext = match kind {
-            EncodingKind::Jpeg => ".jpg",
-            EncodingKind::Webp => ".webp",
-            EncodingKind::None => unreachable!(),
+        let (ext, quality_param) = match kind {
+            EncodingKind::Jpeg => (".jpg", imgcodecs::IMWRITE_JPEG_QUALITY),
+            EncodingKind::Webp => (".webp", imgcodecs::IMWRITE_WEBP_QUALITY),
+            EncodingKind::None => unreachable!("None is short-circuited above"),
         };
         let mut params = Vector::<i32>::new();
-        match kind {
-            EncodingKind::Jpeg => {
-                params.push(imgcodecs::IMWRITE_JPEG_QUALITY);
-                params.push(100);
-            }
-            EncodingKind::Webp => {
-                params.push(imgcodecs::IMWRITE_WEBP_QUALITY);
-                params.push(100);
-            }
-            EncodingKind::None => unreachable!(),
-        }
+        params.push(quality_param);
+        params.push(100);
         let mut buf = Vector::<u8>::new();
         let ok = imgcodecs::imencode(ext, &mat, &mut buf, &params)
             .map_err(|e| ImageEncodingError::Backend(e.to_string()))?;
