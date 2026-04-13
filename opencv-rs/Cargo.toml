@@ -1,0 +1,26 @@
+[package]
+authors.workspace = true
+categories = ["api-bindings", "computer-vision", "multimedia::images"]
+description = "Hexagonal Rust wrapper over OpenCV I/O and image-processing primitives: ports, fakes, FFI adapters"
+edition.workspace = true
+keywords = ["opencv", "computer-vision", "hexagonal", "ports-and-adapters"]
+license.workspace = true
+name = "opencv-rs"
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# Enables the real OpenCV backend via `opencv-rs-ffi/opencv`. When off,
+# only the `opencv-rs-core` port layer is re-exported and `cargo build`
+# succeeds without the OpenCV native libraries installed.
+opencv = ["dep:opencv-rs-ffi", "opencv-rs-ffi/opencv"]
+
+[dependencies]
+opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
+opencv-rs-ffi = { version = "0.1.0", path = "../opencv-rs-ffi", optional = true }
+
+[dev-dependencies]
+opencv-rs-fake = { version = "0.1.0", path = "../opencv-rs-fake" }

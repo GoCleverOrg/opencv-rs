@@ -1,0 +1,25 @@
+[package]
+authors.workspace = true
+categories = ["api-bindings", "external-ffi-bindings", "computer-vision"]
+description = "OpenCV-backed adapters implementing the opencv-rs-core ports"
+edition.workspace = true
+keywords = ["opencv", "computer-vision", "ffi", "adapter", "hexagonal"]
+license.workspace = true
+name = "opencv-rs-ffi"
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# Enables linking against the `opencv` crate. Without this feature the
+# crate compiles to an empty rlib — the OpenCv*-prefixed types only
+# exist when the backend is available. Mirrors the vmb-rs `sdk` feature
+# pattern.
+opencv = ["dep:opencv"]
+
+[dependencies]
+opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
+opencv = { version = "0.93", optional = true }
+tracing = { workspace = true }

@@ -1,0 +1,18 @@
+[package]
+authors.workspace = true
+categories = ["api-bindings", "computer-vision", "multimedia::video"]
+description = "Runtime-agnostic domain types and ports for opencv-rs (no FFI dependency)"
+edition.workspace = true
+keywords = ["opencv", "computer-vision", "ports-and-adapters", "hexagonal"]
+license.workspace = true
+name = "opencv-rs-core"
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+
+[dev-dependencies]
+opencv-rs-fake = { version = "0.1.0", path = "../opencv-rs-fake" }

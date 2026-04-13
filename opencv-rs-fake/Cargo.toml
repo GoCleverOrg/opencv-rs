@@ -1,0 +1,15 @@
+[package]
+authors.workspace = true
+categories = ["api-bindings", "development-tools::testing", "computer-vision"]
+description = "In-memory opencv-rs port implementations for unit testing"
+edition.workspace = true
+keywords = ["opencv", "testing", "fake", "mock", "hexagonal"]
+license.workspace = true
+name = "opencv-rs-fake"
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
