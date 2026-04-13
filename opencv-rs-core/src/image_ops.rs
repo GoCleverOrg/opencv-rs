@@ -300,12 +300,13 @@ mod tests {
     }
 
     #[test]
-    fn threshold_equal_not_above() {
-        let src = mono(1, 1, vec![30]);
+    fn threshold_binary_equal_to_threshold_is_zero() {
+        // Pixel exactly at threshold must NOT exceed it (original uses `>`).
+        let src = mono(3, 1, vec![29, 30, 31]);
         let out = PureRustImageOps
             .threshold(&src, 30.0, 255.0, ThresholdKind::Binary)
             .unwrap();
-        assert_eq!(out.data(), &[0]);
+        assert_eq!(out.data(), &[0, 0, 255]);
     }
 
     #[test]
@@ -342,13 +343,36 @@ mod tests {
     }
 
     #[test]
+    fn absdiff_rejects_same_dims_different_format() {
+        // Bgr8 and Rgb8 both have channels=3, so dims() tuples match; only
+        // pixel_format differs. Kills the `||` -> `&&` mutant on the guard.
+        let a = bgr(1, 1, vec![1, 2, 3]);
+        let b = OwnedMatView::new(1, 1, PixelFormat::Rgb8, vec![1, 2, 3]).unwrap();
+        let err = PureRustImageOps.absdiff(&a, &b).unwrap_err();
+        assert!(matches!(err, ImageOpsError::DimensionMismatch { .. }));
+    }
+
+    #[test]
+    fn absdiff_rejects_when_dims_differ_but_byte_count_matches() {
+        // 4x1 and 2x2 Mono8 both have 4 bytes, so the length fallback check
+        // would accept them. Kills the `dims -> const` mutants by forcing the
+        // dims() inequality check to be the decisive gate.
+        let a = mono(4, 1, vec![1, 2, 3, 4]);
+        let b = mono(2, 2, vec![1, 2, 3, 4]);
+        let err = PureRustImageOps.absdiff(&a, &b).unwrap_err();
+        assert!(matches!(err, ImageOpsError::DimensionMismatch { .. }));
+    }
+
+    #[test]
     fn cvt_color_bgr_to_rgb_swaps_channels() {
-        let src = bgr(1, 1, vec![1, 2, 3]);
+        // Multi-pixel input so the per-chunk offset `i * 3` varies with i;
+        // kills the `*` -> `/` mutant on the offset calculation.
+        let src = bgr(2, 1, vec![1, 2, 3, 10, 20, 30]);
         let out = PureRustImageOps
             .cvt_color(&src, ColorConversion::BgrToRgb)
             .unwrap();
         assert_eq!(out.pixel_format(), PixelFormat::Rgb8);
-        assert_eq!(out.data(), &[3, 2, 1]);
+        assert_eq!(out.data(), &[3, 2, 1, 30, 20, 10]);
     }
 
     #[test]
@@ -373,6 +397,18 @@ mod tests {
     }
 
     #[test]
+    fn cvt_color_bgr_to_gray_all_channels_nonzero() {
+        // All three weights contribute distinctly; kills the arithmetic
+        // mutants on the weighted sum (+ <-> -, + <-> *, * <-> +).
+        // 0.114*100 + 0.587*200 + 0.299*50 = 11.4 + 117.4 + 14.95 = 143.75 -> 144.
+        let src = bgr(1, 1, vec![100, 200, 50]);
+        let out = PureRustImageOps
+            .cvt_color(&src, ColorConversion::BgrToGray)
+            .unwrap();
+        assert_eq!(out.data(), &[144]);
+    }
+
+    #[test]
     fn cvt_color_gray_to_rgb_broadcasts() {
         let src = mono(2, 1, vec![10, 200]);
         let out = PureRustImageOps
@@ -393,7 +429,9 @@ mod tests {
 
     #[test]
     fn count_non_zero_counts_bytes() {
-        let src = mono(2, 2, vec![0, 1, 2, 0]);
+        // Asymmetric zero/non-zero split so the `!= 0` filter cannot be
+        // mutated to `== 0` without changing the expected result.
+        let src = mono(3, 1, vec![0, 1, 2]);
         assert_eq!(PureRustImageOps.count_non_zero(&src).unwrap(), 2);
     }
 
@@ -414,6 +452,17 @@ mod tests {
         assert_eq!(r.max, 7.0);
         assert_eq!(r.min_loc, (2, 0));
         assert_eq!(r.max_loc, (1, 0));
+    }
+
+    #[test]
+    fn min_max_loc_first_occurrence_with_duplicates_and_multi_row() {
+        // Min value 1 appears at idx 4,5,6 -> first at (0,1). Max value 8 only at idx 7 -> (3,1).
+        let src = mono(4, 2, vec![5, 5, 7, 7, 1, 1, 1, 8]);
+        let r = PureRustImageOps.min_max_loc(&src).unwrap();
+        assert_eq!(r.min, 1.0);
+        assert_eq!(r.min_loc, (0, 1));
+        assert_eq!(r.max, 8.0);
+        assert_eq!(r.max_loc, (3, 1));
     }
 
     #[test]
@@ -444,6 +493,17 @@ mod tests {
         let src = mono(1, 1, vec![10]);
         let out = PureRustImageOps.convert_scale_abs(&src, -2.0, 0.0).unwrap();
         assert_eq!(out.data(), &[20]);
+    }
+
+    #[test]
+    fn convert_scale_abs_requires_abs_for_negative_intermediate() {
+        // 255 * -1 + -100 = -355; abs() -> 355 -> saturates to 255.
+        // Without abs() the result would saturate to 0.
+        let src = mono(1, 1, vec![255]);
+        let out = PureRustImageOps
+            .convert_scale_abs(&src, -1.0, -100.0)
+            .unwrap();
+        assert_eq!(out.data(), &[255]);
     }
 
     #[test]

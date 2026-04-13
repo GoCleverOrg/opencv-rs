@@ -132,6 +132,24 @@ mod tests {
     }
 
     #[test]
+    fn pseudo_encoding_tags_pixel_format_distinctly() {
+        // Each PixelFormat gets a distinct non-zero tag byte. Kills the
+        // `pixel_format_tag -> 0` and `-> 1` mutants.
+        // Layout: magic(10) + width(4) + height(4) + channels(4) + tag(1) + data.
+        const TAG_OFFSET: usize = 10 + 4 + 4 + 4;
+        let enc = ScriptedImageEncoder::new();
+        let mono = OwnedMatView::new(1, 1, PixelFormat::Mono8, vec![0]).unwrap();
+        let bgr = OwnedMatView::new(1, 1, PixelFormat::Bgr8, vec![0, 0, 0]).unwrap();
+        let rgb = OwnedMatView::new(1, 1, PixelFormat::Rgb8, vec![0, 0, 0]).unwrap();
+        let m = enc.encode(&mono, EncodingKind::Jpeg).unwrap();
+        let b = enc.encode(&bgr, EncodingKind::Jpeg).unwrap();
+        let r = enc.encode(&rgb, EncodingKind::Jpeg).unwrap();
+        assert_eq!(m[TAG_OFFSET], 1);
+        assert_eq!(b[TAG_OFFSET], 2);
+        assert_eq!(r[TAG_OFFSET], 3);
+    }
+
+    #[test]
     fn calls_are_recorded() {
         let enc = ScriptedImageEncoder::new();
         let frame = src();

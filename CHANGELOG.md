@@ -20,3 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Equivalence tests in `opencv-rs-ffi/tests/equivalence/` for every pure-Rust reimplementation.
 - `ScriptedVideoCapture`, `ScriptedVideoStream`, `ScriptedImageEncoder`, `PassthroughImageOps` scripted fakes.
 - Zero-copy `slice_to_mat` helper in `opencv-rs-ffi`.
+- Mutation-testing gate: `cargo mutants -p opencv-rs-core` and `cargo mutants -p opencv-rs-fake` both report 100% score (`.cargo/mutants.toml` excludes `contract_tests.rs`, which is test infrastructure rather than domain logic).

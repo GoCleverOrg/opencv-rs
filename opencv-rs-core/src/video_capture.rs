@@ -72,17 +72,19 @@ mod tests {
 
     #[test]
     fn captured_frame_exposes_mat_view() {
+        // height=3, Bgr8 -> channels=3. Distinct from 1 so the `height -> 1`
+        // and `channels -> 1` mutants cannot survive.
         let frame = CapturedFrame {
             width: 2,
-            height: 1,
-            pixel_format: PixelFormat::Mono8,
-            data: Arc::from(vec![1u8, 2u8].into_boxed_slice()),
+            height: 3,
+            pixel_format: PixelFormat::Bgr8,
+            data: Arc::from(vec![0u8; 2 * 3 * 3].into_boxed_slice()),
         };
         assert_eq!(frame.width(), 2);
-        assert_eq!(frame.height(), 1);
-        assert_eq!(frame.channels(), 1);
-        assert_eq!(frame.pixel_format(), PixelFormat::Mono8);
-        assert_eq!(frame.data(), &[1u8, 2u8]);
+        assert_eq!(frame.height(), 3);
+        assert_eq!(frame.channels(), 3);
+        assert_eq!(frame.pixel_format(), PixelFormat::Bgr8);
+        assert_eq!(frame.data().len(), 18);
     }
 
     #[test]

@@ -112,6 +112,8 @@ mod tests {
     fn zeros_allocates_zeroed_buffer() {
         let v = OwnedMatView::zeros(4, 2, PixelFormat::Bgr8);
         assert_eq!(v.data().len(), 4 * 2 * 3);
+        assert_eq!(v.channels(), 3);
+        assert_eq!(v.pixel_format(), PixelFormat::Bgr8);
         assert!(v.data().iter().all(|&b| b == 0));
     }
 
