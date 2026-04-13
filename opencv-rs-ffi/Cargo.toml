@@ -23,6 +23,3 @@ opencv = ["dep:opencv"]
 opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
 opencv = { version = "0.93", optional = true }
 tracing = { workspace = true }
-
-[dev-dependencies]
-opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }

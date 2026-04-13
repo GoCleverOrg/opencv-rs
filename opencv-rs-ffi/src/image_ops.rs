@@ -182,7 +182,13 @@ impl ImageOpsPort for OpenCvImageOps {
         require_mono(src)?;
         let src_mat = mat_from_view(src)?;
         let n = core::count_non_zero(&src_mat).map_err(backend)?;
-        Ok(n.max(0) as u64)
+        if n < 0 {
+            return Err(ImageOpsError::Backend(format!(
+                "count_non_zero returned negative: {}",
+                n
+            )));
+        }
+        Ok(n as u64)
     }
 
     fn resize(

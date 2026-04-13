@@ -8,7 +8,9 @@
 
 use opencv_rs_core::contract_tests as ct;
 use opencv_rs_core::{Backend, CapturedFrame, PixelFormat, VideoCapturePort, VideoStream};
-use opencv_rs_ffi::{OpenCvImageEncoder, OpenCvImageOps, OpenCvVideoCapture};
+use opencv_rs_ffi::{
+    slice_to_mat, OpenCvImageEncoder, OpenCvImageOps, OpenCvMatView, OpenCvVideoCapture,
+};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -124,6 +126,54 @@ fn mat_view_data_length_contract() {
 fn mat_view_pixel_format_contract() {
     let frame = sample_bgr();
     ct::verify_mat_view_pixel_format(&frame, PixelFormat::Bgr8);
+}
+
+#[test]
+fn opencv_mat_view_bgr_dimensions_contract() {
+    let data: Vec<u8> = (0..48u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 3) }.expect("build bgr mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap bgr mat");
+    ct::verify_mat_view_dimensions(&view, (4, 4, 3));
+}
+
+#[test]
+fn opencv_mat_view_bgr_data_length_contract() {
+    let data: Vec<u8> = (0..48u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 3) }.expect("build bgr mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap bgr mat");
+    ct::verify_mat_view_data_length(&view);
+}
+
+#[test]
+fn opencv_mat_view_bgr_pixel_format_contract() {
+    let data: Vec<u8> = (0..48u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 3) }.expect("build bgr mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap bgr mat");
+    ct::verify_mat_view_pixel_format(&view, PixelFormat::Bgr8);
+}
+
+#[test]
+fn opencv_mat_view_mono_dimensions_contract() {
+    let data: Vec<u8> = (0..16u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 1) }.expect("build mono mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap mono mat");
+    ct::verify_mat_view_dimensions(&view, (4, 4, 1));
+}
+
+#[test]
+fn opencv_mat_view_mono_data_length_contract() {
+    let data: Vec<u8> = (0..16u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 1) }.expect("build mono mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap mono mat");
+    ct::verify_mat_view_data_length(&view);
+}
+
+#[test]
+fn opencv_mat_view_mono_pixel_format_contract() {
+    let data: Vec<u8> = (0..16u8).collect();
+    let mat = unsafe { slice_to_mat(&data, 4, 4, 1) }.expect("build mono mat");
+    let view = OpenCvMatView::try_from_mat(&mat).expect("wrap mono mat");
+    ct::verify_mat_view_pixel_format(&view, PixelFormat::Mono8);
 }
 
 #[test]

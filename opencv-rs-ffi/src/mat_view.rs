@@ -35,6 +35,11 @@ impl<'a> OpenCvMatView<'a> {
                 "OpenCvMatView: only CV_8U depth is supported",
             ));
         }
+        if !mat.is_continuous() {
+            return Err(ImageOpsError::InvalidParameter(
+                "OpenCvMatView: non-continuous Mat is not supported",
+            ));
+        }
         let pixel_format = match mat.channels() {
             1 => PixelFormat::Mono8,
             3 => PixelFormat::Bgr8,
@@ -76,11 +81,9 @@ impl<'a> MatView for OpenCvMatView<'a> {
         self.pixel_format
     }
     fn data(&self) -> &[u8] {
-        // `data_bytes` fails when the Mat is non-continuous; we built
-        // this view from a user-supplied Mat so propagate a sensible
-        // empty slice for empty mats and let OpenCV's own errors surface
-        // via try_from_mat / higher layers for exotic layouts.
-        self.mat.data_bytes().unwrap_or(&[])
+        self.mat
+            .data_bytes()
+            .expect("OpenCvMatView invariant: continuity checked at construction")
     }
 }
 
@@ -121,4 +124,56 @@ pub unsafe fn slice_to_mat(
         return view.try_clone();
     };
     reshaped.try_clone()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use opencv::core::MatTraitConst;
+
+    #[test]
+    fn slice_to_mat_mono_round_trip() {
+        let data: Vec<u8> = (0..16u8).collect();
+        let mat = unsafe { slice_to_mat(&data, 4, 4, 1) }.expect("build mono mat");
+        assert_eq!(mat.rows(), 4);
+        assert_eq!(mat.cols(), 4);
+        assert_eq!(mat.channels(), 1);
+        assert_eq!(mat.data_bytes().unwrap(), data.as_slice());
+    }
+
+    #[test]
+    fn slice_to_mat_bgr_round_trip() {
+        let data: Vec<u8> = (0..48u8).collect();
+        let mat = unsafe { slice_to_mat(&data, 4, 4, 3) }.expect("build bgr mat");
+        assert_eq!(mat.rows(), 4);
+        assert_eq!(mat.cols(), 4);
+        assert_eq!(mat.channels(), 3);
+        assert_eq!(mat.data_bytes().unwrap(), data.as_slice());
+    }
+
+    #[test]
+    fn try_from_mat_rejects_non_continuous() {
+        use opencv::core::CV_8UC1;
+        // Build a 4x4 mono Mat backed by a 4x8 buffer (step=8) so the
+        // rows are strided and the Mat is non-continuous.
+        let mut buf: Vec<u8> = vec![0u8; 32];
+        let mat = unsafe {
+            Mat::new_rows_cols_with_data_unsafe(
+                4,
+                4,
+                CV_8UC1,
+                buf.as_mut_ptr().cast::<std::ffi::c_void>(),
+                8,
+            )
+        }
+        .expect("build non-continuous mat");
+        assert!(!mat.is_continuous());
+        match OpenCvMatView::try_from_mat(&mat) {
+            Ok(_) => panic!("expected non-continuous Mat to be rejected"),
+            Err(ImageOpsError::InvalidParameter(msg)) => {
+                assert!(msg.contains("non-continuous"), "got: {msg}");
+            }
+            Err(other) => panic!("expected InvalidParameter, got {other:?}"),
+        }
+    }
 }
