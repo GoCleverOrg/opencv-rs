@@ -12,7 +12,6 @@ rust-version = "1.84"
 
 [workspace.dependencies]
 thiserror = "1.0"
-tracing = "0.1"
 
 # Scoped profile for cargo-mutants runs. Inherits from `dev` so incremental
 # compilation still works across experiments; trims debuginfo and forces a

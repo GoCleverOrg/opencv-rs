@@ -18,5 +18,35 @@
 
 pub use opencv_rs_core as core;
 
+pub use opencv_rs_core::{
+    Backend, CapturedFrame, ColorConversion, EncodingKind, ImageEncoderPort, ImageEncodingError,
+    ImageOpsError, ImageOpsPort, MatView, MinMaxResult, OpenCvError, OwnedMatView, PixelFormat,
+    PureRustImageOps, Result, ThresholdKind, VideoCaptureError, VideoCapturePort, VideoStream,
+};
+
 #[cfg(feature = "opencv")]
 pub use opencv_rs_ffi as ffi;
+
+/// Production [`VideoCapturePort`] implementation backed by the `opencv` crate.
+#[cfg(feature = "opencv")]
+pub type RealVideoCapture = opencv_rs_ffi::OpenCvVideoCapture;
+
+/// Production [`ImageEncoderPort`] implementation backed by the `opencv` crate.
+#[cfg(feature = "opencv")]
+pub type RealImageEncoder = opencv_rs_ffi::OpenCvImageEncoder;
+
+/// Production [`ImageOpsPort`] implementation backed by the `opencv` crate.
+#[cfg(feature = "opencv")]
+pub type RealImageOps = opencv_rs_ffi::OpenCvImageOps;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use opencv_rs_fake::ScriptedVideoCapture;
+
+    #[test]
+    fn facade_types_compose() {
+        let capture = ScriptedVideoCapture::new();
+        let _port: &dyn VideoCapturePort = &capture;
+    }
+}

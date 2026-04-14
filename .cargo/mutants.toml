@@ -1,0 +1,3 @@
+# contract_tests modules are reusable test harnesses (downstream-driven verifiers), not
+# domain logic — every helper body trivially survives `fn body -> ()` replacement.
+exclude_globs = ["**/contract_tests.rs"]
