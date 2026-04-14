@@ -10,6 +10,13 @@
 //! `sdk`-feature pattern for `vmb-ffi`). When the feature is off this
 //! crate compiles to an empty rlib — none of the `OpenCv*` adapter
 //! types exist.
+//!
+//! # Requirements
+//!
+//! Requires OpenCV 4.10 or later when the `opencv` feature is
+//! enabled. The `cvt_color` and `gaussian_blur` adapters use
+//! `AlgorithmHint::ALGO_HINT_DEFAULT`, introduced in OpenCV 4.10.
+//! A `build.rs` guardrail rejects older versions at compile time.
 
 #[cfg(feature = "opencv")]
 mod conversion;

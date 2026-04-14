@@ -7,6 +7,10 @@ Follows the same ports-and-adapters layout as
 layers do not depend on the FFI, and a production adapter wraps the
 real backend behind a Cargo feature.
 
+## Requirements
+
+OpenCV 4.10 or later (when using the `opencv` feature). The `cvt_color` and `gaussian_blur` adapters use `AlgorithmHint::ALGO_HINT_DEFAULT`, introduced in OpenCV 4.10.
+
 ## Architecture
 
 ```text

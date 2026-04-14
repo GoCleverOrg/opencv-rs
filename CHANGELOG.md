@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-04-14
+
+Non-breaking release. Docs-only + build-time guardrail; no API changes.
+
+### Added
+
+- Declared OpenCV 4.10+ minimum version in `README.md`, `opencv-rs-ffi/README.md`, and `opencv-rs-ffi/src/lib.rs` crate docs.
+- `opencv-rs-ffi/build.rs` guardrail: probes the linked OpenCV version via `pkg-config` and fails compilation with a clear diagnostic when the detected version is earlier than 4.10.
+- Inline comment on `opencv-rs-ffi/Cargo.toml` `opencv` dependency aligning the Rust crate pin (0.93) with the C-library floor (4.10+).
+
+### Context
+
+The `cvt_color` and `gaussian_blur` adapters in `opencv-rs-ffi` reference `AlgorithmHint::ALGO_HINT_DEFAULT`, introduced in OpenCV 4.10. Previously consumers on older OpenCV versions saw a cryptic rustc type error; the new guardrail produces a human-readable message naming the crate, detected version, and required version.
+
 ## [0.1.0] - 2026-04-13
 
 ### Added

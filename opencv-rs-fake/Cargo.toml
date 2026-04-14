@@ -12,4 +12,4 @@ rust-version.workspace = true
 version.workspace = true
 
 [dependencies]
-opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
+opencv-rs-core = { version = "0.1.1", path = "../opencv-rs-core" }
