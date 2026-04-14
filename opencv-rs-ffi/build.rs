@@ -2,8 +2,8 @@ use std::env;
 use std::process::Command;
 
 fn main() {
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_OPENCV");
+    println!("cargo::rerun-if-changed=build.rs");
+    println!("cargo::rerun-if-env-changed=CARGO_FEATURE_OPENCV");
 
     if env::var("CARGO_FEATURE_OPENCV").is_err() {
         return;
@@ -13,7 +13,7 @@ fn main() {
         Some(v) => v,
         None => {
             println!(
-                "cargo:warning=opencv-rs-ffi: pkg-config did not report an OpenCV version; skipping 4.10 floor check. The opencv crate's build script will surface any linkage errors."
+                "cargo::warning=opencv-rs-ffi: pkg-config did not report an OpenCV version; skipping 4.10 floor check. The opencv crate's build script will surface any linkage errors."
             );
             return;
         }
@@ -23,7 +23,7 @@ fn main() {
         Some(mm) => mm,
         None => {
             println!(
-                "cargo:warning=opencv-rs-ffi: could not parse OpenCV version '{}'; skipping 4.10 floor check.",
+                "cargo::warning=opencv-rs-ffi: could not parse OpenCV version '{}'; skipping 4.10 floor check.",
                 version
             );
             return;
