@@ -13,6 +13,3 @@ version.workspace = true
 
 [dependencies]
 thiserror = { workspace = true }
-
-[dev-dependencies]
-opencv-rs-fake = { version = "0.1.0", path = "../opencv-rs-fake" }

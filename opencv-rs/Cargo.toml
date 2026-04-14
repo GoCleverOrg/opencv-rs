@@ -23,4 +23,4 @@ opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
 opencv-rs-ffi = { version = "0.1.0", path = "../opencv-rs-ffi", optional = true }
 
 [dev-dependencies]
-opencv-rs-fake = { version = "0.1.0", path = "../opencv-rs-fake" }
+opencv-rs-fake = { path = "../opencv-rs-fake" }
