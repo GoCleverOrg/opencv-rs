@@ -19,8 +19,8 @@ default = []
 opencv = ["dep:opencv-rs-ffi", "opencv-rs-ffi/opencv"]
 
 [dependencies]
-opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
-opencv-rs-ffi = { version = "0.1.0", path = "../opencv-rs-ffi", optional = true }
+opencv-rs-core = { version = "0.1.1", path = "../opencv-rs-core" }
+opencv-rs-ffi = { version = "0.1.1", path = "../opencv-rs-ffi", optional = true }
 
 [dev-dependencies]
 opencv-rs-fake = { path = "../opencv-rs-fake" }

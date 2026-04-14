@@ -7,6 +7,10 @@ This is the **only** crate in the workspace that depends on the
 `opencv` crate. Every other crate sees OpenCV exclusively through the
 `opencv-rs-core` trait surface.
 
+## Requirements
+
+OpenCV 4.10 or later when the `opencv` feature is enabled. The `cvt_color` and `gaussian_blur` adapters use `AlgorithmHint::ALGO_HINT_DEFAULT`, an API introduced in OpenCV 4.10.
+
 ## `opencv` feature gate
 
 All functionality is gated behind the `opencv` Cargo feature. Without

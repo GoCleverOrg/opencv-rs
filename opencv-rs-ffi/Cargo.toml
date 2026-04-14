@@ -20,5 +20,5 @@ default = []
 opencv = ["dep:opencv"]
 
 [dependencies]
-opencv-rs-core = { version = "0.1.0", path = "../opencv-rs-core" }
-opencv = { version = "0.93", optional = true }
+opencv-rs-core = { version = "0.1.1", path = "../opencv-rs-core" }
+opencv = { version = "0.93", optional = true } # Rust crate 0.93 aligns with the OpenCV 4.10+ C-library floor (see README).
