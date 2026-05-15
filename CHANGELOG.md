@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-05-15
+
+Patch release. Bumps the underlying `opencv` Rust crate dep range from
+`0.93` to `0.95` so that `AlgorithmHint::ALGO_HINT_DEFAULT` is reliably
+generated against OpenCV 4.10 system libraries (e.g. Debian trixie's
+`libopencv-dev 4.10.0`). No public API change.
+
+### Fixed
+
+- `opencv-rs-ffi` failed to compile against OpenCV 4.10 system
+  libraries with `no AlgorithmHint in opencv::hub::core`. Root cause:
+  the `opencv 0.93.x` Rust crate's bindings generator only included
+  `AlgorithmHint` when the system OpenCV reported 4.11+; 4.10 was
+  the documented floor but in practice the bindings were absent.
+  Bumping to `opencv 0.95.x` widens the binding inclusion to cover
+  4.10 cleanly. Verified by a successful build of the downstream
+  `mira` workspace's Docker image against `rust:1.94.1-trixie`
+  (`libopencv-dev 4.10.0+dfsg-5`).
+
+### Changed
+
+- `opencv-rs-ffi/Cargo.toml`: dependency `opencv = "0.93"` → `opencv = "0.95"`.
+
 ## [0.1.1] - 2026-04-14
 
 Non-breaking release. Docs-only + build-time guardrail; no API changes.

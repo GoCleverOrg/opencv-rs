@@ -20,5 +20,5 @@ default = []
 opencv = ["dep:opencv"]
 
 [dependencies]
-opencv-rs-core = { version = "0.1.1", path = "../opencv-rs-core" }
-opencv = { version = "0.93", optional = true } # Rust crate 0.93 aligns with the OpenCV 4.10+ C-library floor (see README).
+opencv-rs-core = { version = "0.1.2", path = "../opencv-rs-core" }
+opencv = { version = "0.95", optional = true } # Rust crate 0.95+ generates AlgorithmHint bindings reliably for OpenCV 4.10+ system libs; 0.93 only exposed them when the system was 4.11+, breaking Debian trixie builds.
